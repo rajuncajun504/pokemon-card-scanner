@@ -66,6 +66,8 @@ footer{color:#6b7280;font-size:.78rem;text-align:center;margin:18px 0}
 const $ = id => document.getElementById(id);
 let cart = JSON.parse(localStorage.getItem('merchCart') || '[]');
 let nfcReader = null;
+let lastScanKey='',lastScanAt=0;
+let ignoreScansUntil=0;
 const money = n => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n);
 function save(){localStorage.setItem('merchCart',JSON.stringify(cart));render()}
 function render(){
@@ -124,8 +126,9 @@ $('scan').onclick=async()=>{
     nfcReader=new NDEFReader();
     await nfcReader.scan();
     $('state').textContent='Scanner active';
-    $('status').textContent='Scanner is active. Tap an NFC tag to the back of your phone.';
-    nfcReader.onreading=event=>{let lastScanKey='',lastScanAt=0;
+    $('status').textContent='Scanner is active. Tap an NFC tag to the back of your
+      nfcReader.onreading=event=>{
+if(Date.now()<ignoreScansUntil)return;
       let decoded=[];
       for(const record of event.message.records){
         if(record.recordType==='text'){
