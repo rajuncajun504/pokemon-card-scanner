@@ -125,7 +125,7 @@ $('scan').onclick=async()=>{
     await nfcReader.scan();
     $('state').textContent='Scanner active';
     $('status').textContent='Scanner is active. Tap an NFC tag to the back of your phone.';
-    nfcReader.onreading=event=>{
+    nfcReader.onreading=event=>{let lastScanKey='',lastScanAt=0;
       let decoded=[];
       for(const record of event.message.records){
         if(record.recordType==='text'){
@@ -134,7 +134,13 @@ $('scan').onclick=async()=>{
         }
       }
       const parsed=decoded.map(parseTag).find(Boolean);
-      if(parsed)addItem(parsed.name,parsed.price);
+    if(parsed){
+const key=parsed.name+'|'+parsed.price;
+const now=Date.now();
+if(key!==lastScanKey||now-lastScanAt>1500)addItem(parsed.name,parsed.price);
+lastScanKey=key;
+lastScanAt=now;
+}
       else $('status').textContent='Tag read, but no price found. Write a text record such as Pokemon card|5.00';
     };
     nfcReader.onreadingerror=()=>{$('status').textContent='Could not read that tag. Try holding it against the back of the phone.'};
