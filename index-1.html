@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#173b91">
+<title>Pokémon Card Price Scanner</title>
+<style>
+:root{--navy:#10245e;--blue:#1769d2;--yellow:#ffd83d;--red:#e84242;--ink:#17213b}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:white;background:radial-gradient(circle at 15% 10%,#55c7ff 0 3%,transparent 20%),radial-gradient(circle at 90% 20%,#ffe66b 0 2%,transparent 17%),linear-gradient(145deg,#10245e,#1769d2 55%,#6d42ba);background-attachment:fixed;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;background-image:radial-gradient(circle,#fff 1.5px,transparent 2px),linear-gradient(135deg,transparent 48%,#fff 49%,transparent 51%);background-size:38px 38px,130px 130px;z-index:-1}
+.wrap{max-width:720px;margin:auto;padding:18px 14px 36px}.hero{text-align:center;padding:18px 10px 20px}.ball{width:66px;height:66px;border:5px solid white;border-radius:50%;margin:0 auto 10px;position:relative;background:linear-gradient(#ef4545 0 46%,#17213b 47% 54%,#fff 55%);box-shadow:0 5px 0 #0b1744,0 0 22px #fff8}.ball:after{content:"";position:absolute;width:19px;height:19px;border:5px solid #17213b;background:white;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}
+h1{font-size:clamp(25px,6vw,38px);line-height:1.05;margin:8px 0;color:#ffdf48;text-shadow:2px 3px 0 #18316f,0 0 12px #fff7;letter-spacing:.3px}.sub{margin:8px 0 0;font-weight:650;color:#eaf5ff}
+.panel{background:#fff;color:var(--ink);border:3px solid #ffdc45;border-radius:20px;padding:17px;margin:13px 0;box-shadow:0 8px 0 #0b1744,0 12px 25px #06143d66}
+h2{font-size:18px;margin:0 0 12px;color:#173b91}.row{display:flex;gap:9px;flex-wrap:wrap}.row>*{flex:1}
+button{border:0;border-radius:12px;padding:13px 15px;font-size:15px;font-weight:800;cursor:pointer;background:#1769d2;color:white;box-shadow:0 3px 0 #0d397d}button:active{transform:translateY(2px);box-shadow:0 1px 0 #0d397d}button.yellow{background:#ffd83d;color:#17213b;box-shadow:0 3px 0 #bd9415}button.red{background:#e84242;box-shadow:0 3px 0 #9e2525}button.light{background:#e8f2ff;color:#173b91;box-shadow:0 3px 0 #b9d4f5}
+input{width:100%;padding:12px;border:2px solid #c8d9f0;border-radius:10px;font-size:16px;color:#17213b;background:white;min-width:0}label{font-size:13px;font-weight:800;color:#405275;display:block;margin:10px 0 5px}.status{padding:10px 12px;border-radius:10px;background:#eaf4ff;color:#173b91;font-weight:650;font-size:14px;margin-top:10px}.totals{display:grid;grid-template-columns:1fr 1fr;gap:10px}.totalbox{background:#edf5ff;border-radius:13px;padding:12px}.totalbox small{display:block;color:#50617d;font-weight:700}.totalbox strong{font-size:24px;color:#173b91}.grand{background:#fff3bd}.grand strong{color:#a45b00}.cartrow{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #e4ebf4}.cartrow:last-child{border-bottom:0}.item{flex:1;min-width:0}.item b{display:block;overflow-wrap:anywhere}.item small{color:#65738c}.price{font-weight:850;white-space:nowrap}.remove{padding:7px 10px;font-size:12px;background:#ffe8e8;color:#a32323;box-shadow:none}.empty{text-align:center;color:#6b7890;padding:15px}.fine{font-size:12px;color:#63718a;line-height:1.5;margin:10px 2px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:420px){.wrap{padding:12px 10px}.panel{padding:14px}.row button{font-size:13px;padding:12px 8px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero"><div class="ball" aria-hidden="true"></div><h1>POKÉMON CARD<br>PRICE SCANNER</h1><p class="sub">Scan • Add to cart • Keep track of your total</p></header>
+<section class="panel">
+<h2>⚡ NFC Checkout</h2>
+<div class="row"><button id="start" class="yellow">Start NFC Scanner</button><button id="stop" class="light">Stop Scanner</button></div>
+<div id="status" class="status">Ready. Tap Start NFC Scanner, then scan a tag.</div>
+<p class="fine">For NFC scanning, open this page in Chrome on your Android phone over HTTPS, keep the page open, and make sure NFC is turned on. Each tag should contain a text record such as <b>Pokémon card|5.00</b>.</p>
+</section>
+<section class="panel">
+<h2>➕ Add item manually</h2>
+<label for="name">Card / item name</label><input id="name" placeholder="Example: Pikachu VMAX">
+<div class="two"><div><label for="price">Price ($)</label><input id="price" type="number" min="0" step=".01" placeholder="5.00"></div><div><label for="tax">Sales tax (%)</label><input id="tax" type="number" min="0" step=".01" value="0"></div></div>
+<div class="row" style="margin-top:12px"><button id="add" class="yellow">Add to Cart</button><button id="undo" class="light">Undo Last</button></div>
+</section>
+<section class="panel">
+<h2>🛒 Cart</h2><div id="cart"><div class="empty">Your cart is empty. Scan a tag or add an item.</div></div>
+<div class="totals" style="margin-top:12px"><div class="totalbox"><small>Subtotal</small><strong id="subtotal">$0.00</strong></div><div class="totalbox"><small>Sales tax</small><strong id="taxamount">$0.00</strong></div><div class="totalbox grand" style="grid-column:1/-1"><small>TOTAL</small><strong id="grand">$0.00</strong></div></div>
+<div class="row" style="margin-top:14px"><button id="finish" class="yellow">Finish Sale</button><button id="clear" class="red">Clear Cart</button></div>
+</section>
+<p class="fine">This app totals your sale; it does not accept payments. Cart data is saved on this device. NFC support depends on your Android browser and tag format.</p>
+</div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+let cart=[];
+try { cart=JSON.parse(localStorage.getItem('pokemonPriceCart')||'[]'); if(!Array.isArray(cart)) cart=[]; } catch(e) { cart=[]; }
+let reader=null,controller=null,lastAdded=null;
+const money=n=>'$'+Number(n||0).toFixed(2);
+function save(){localStorage.setItem('pokemonPriceCart',JSON.stringify(cart));render();}
+function render(){const el=$('cart');if(!cart.length){el.innerHTML='<div class="empty">Your cart is empty. Scan a tag or add an item.</div>';}else{el.innerHTML=cart.map((x,i)=>`<div class="cartrow"><div class="item"><b>${escapeHtml(x.name)}</b><small>Qty ${x.qty} · ${money(x.price)} each</small></div><div class="price">${money(x.qty*x.price)}</div><button class="remove" data-i="${i}">Remove</button></div>`).join('');el.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{cart.splice(Number(b.dataset.i),1);save();});}
+const sub=cart.reduce((s,x)=>s+x.price*x.qty,0),rate=Math.max(0,Number($('tax').value)||0)/100,tax=sub*rate;$('subtotal').textContent=money(sub);$('taxamount').textContent=money(tax);$('grand').textContent=money(sub+tax);}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function addItem(name,price){name=String(name||'Pokémon card').trim();price=Number(price);if(!Number.isFinite(price)||price<0){$('status').textContent='That tag did not contain a valid price. Use Name|5.00 format.';return;}const existing=cart.find(x=>x.name.toLowerCase()===name.toLowerCase()&&x.price===price);if(existing)existing.qty++;else cart.push({name,price,qty:1});lastAdded=cart.length-1;save();$('status').textContent=`Added ${name} — ${money(price)}`;}
+function parseRecord(value){let s=String(value||'').trim();try{const j=JSON.parse(s);if(j&&typeof j==='object')return {name:j.name||j.title||'Pokémon card',price:j.price??j.amount};}catch(e){}const parts=s.split('|');if(parts.length>=2)return {name:parts.slice(0,-1).join('|').trim(),price:parts[parts.length-1].trim()};if(/^\$?\d+(\.\d{1,2})?$/.test(s))return {name:'Pokémon card',price:s.replace('$','')};return null;}
+$('add').onclick=()=>{if(!$('name').value.trim()||$('price').value===''){$('status').textContent='Enter an item name and price first.';return;}addItem($('name').value,$('price').value);$('name').value='';$('price').value='';};
+$('undo').onclick=()=>{if(cart.length){cart.pop();save();$('status').textContent='Last cart entry removed.';}};
+$('clear').onclick=()=>{if(confirm('Clear the entire cart?')){cart=[];save();$('status').textContent='Cart cleared.';}};
+$('finish').onclick=()=>{if(!cart.length){$('status').textContent='Cart is empty.';return;}const total=$('grand').textContent;if(confirm('Finish sale for '+total+'? This clears the cart.')){cart=[];save();$('status').textContent='Sale finished. Ready for the next customer.';}};
+$('tax').oninput=render;
+$('start').onclick=async()=>{
+ if(!('NDEFReader' in window)){$('status').textContent='NFC scanning is not supported here. Open this page in Chrome on Android using HTTPS.';return;}
+ try{
+  if(controller)controller.abort();
+  controller=new AbortController();
+  reader=new NDEFReader();
+  reader.onreading=event=>{
+   let found=[];
+   for(const r of event.message.records){
+    if(r.recordType==='text'){
+     try{const decoder=new TextDecoder(r.encoding||'utf-8');found.push(decoder.decode(r.data));}catch(e){console.error('Could not decode NFC text record',e);}
+    }
+   }
+   const parsed=parseRecord(found.join('\n'));
+   if(parsed)addItem(parsed.name,parsed.price);
+   else $('status').textContent='Tag read, but no usable price found. Store text like Pokémon card|5.00.';
+  };
+  reader.onreadingerror=()=>{$('status').textContent='Could not read that tag. Try holding it still near the back of the phone.';};
+  await reader.scan({signal:controller.signal});
+  $('status').textContent='Scanner active. Hold an NFC tag near your phone.';
+ }catch(e){$('status').textContent='Could not start NFC: '+(e.message||e);console.error('NFC start failed',e);}
+};
+$('stop').onclick=()=>{if(controller)controller.abort();controller=null;reader=null;$('status').textContent='NFC scanner stopped.';};
+render();
+</script>
+</body>
+</html>
