@@ -135,17 +135,14 @@ $('scan').onclick=async()=>{
       }
       const parsed=decoded.map(parseTag).find(Boolean);
     if(parsed){
-const key=parsed.name+'|'+parsed.price;
-const now=Date.now();
-if(key!==lastScanKey||now-lastScanAt>2000)addItem(parsed.name,parsed.price);
-lastScanKey=key;
-lastScanAt=now;
-}
-const key=parsed.name+'|'+parsed.price;
-const now=Date.now();
-if(key!==lastScanKey||now-lastScanAt>1500)addItem(parsed.name,parsed.price);
-lastScanKey=key;
-lastScanAt=now;
+  const key=parsed.name+'|'+parsed.price;
+  const now=Date.now();
+
+  if(key!==lastScanKey || now-lastScanAt>1500){
+    addItem(parsed.name,parsed.price);
+    lastScanKey=key;
+    lastScanAt=now;
+  }
 }
       else $('status').textContent='Tag read, but no price found. Write a text record such as Pokemon card|5.00';
     };
