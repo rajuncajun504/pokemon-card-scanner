@@ -137,6 +137,12 @@ $('scan').onclick=async()=>{
     if(parsed){
 const key=parsed.name+'|'+parsed.price;
 const now=Date.now();
+if(key!==lastScanKey||now-lastScanAt>2000)addItem(parsed.name,parsed.price);
+lastScanKey=key;
+lastScanAt=now;
+}
+const key=parsed.name+'|'+parsed.price;
+const now=Date.now();
 if(key!==lastScanKey||now-lastScanAt>1500)addItem(parsed.name,parsed.price);
 lastScanKey=key;
 lastScanAt=now;
